@@ -1,6 +1,6 @@
 from enum import Enum
 from uuid import UUID
-from datetime import date
+from datetime import date, datetime
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -47,7 +47,16 @@ class User(UserBase):
 
 
 class Tweet(BaseModel):
-    pass
+    id: UUID = Field(default=...)
+    content: str = Field(
+        default=...,
+        min_length=1,
+        max_length=256,
+        example='Hola',
+    )
+    created_at: datetime = Field(default=datetime.now())
+    updated_at: datetime | None = Field(default=None)
+    by: User = Field(default=...,)
 
 
 @app.get(
