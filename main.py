@@ -1,16 +1,19 @@
-from enum import Enum
-from uuid import UUID
 from datetime import date, datetime
+from enum import Enum
+from typing import List
+from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
-from fastapi import FastAPI, status
-from fastapi.middleware.cors import CORSMiddleware
+from fastapi import FastAPI, Path, status
 
 app = FastAPI()
 
 class Tags(Enum):
     home = 'Home'
+    auth = 'Auth'
+    users = 'Users'
+    tweets = 'Tweets'
 
 
 class UserBase(BaseModel):
@@ -59,6 +62,7 @@ class Tweet(BaseModel):
     by: User = Field(default=...,)
 
 
+''' Path operations'''
 @app.get(
     path='/',
     status_code=status.HTTP_200_OK,
@@ -67,3 +71,82 @@ class Tweet(BaseModel):
 )
 def home() -> dict[str, str]:
     return {'Twitter API': 'Working!'}
+
+''' Auth '''
+@app.post(
+    path='/auth/signup',
+    status_code=status.HTTP_201_CREATED,
+    tags=[Tags.auth],
+    summary='Register a user',
+)
+def signup() -> User:
+    return User()
+
+@app.post(
+    path='/auth/login',
+    status_code=status.HTTP_200_OK,
+    tags=[Tags.auth],
+    summary='Login a user',
+)
+def login() -> UserLogin:
+    return UserLogin()
+
+''' Users '''
+@app.get(
+    path='/users',
+    status_code=status.HTTP_200_OK,
+    tags=[Tags.users],
+    summary='Get all users',
+)
+def get_all_users() -> List[User]:
+    return [User()]
+
+@app.get(
+    path='/users/{user_id}',
+    status_code=status.HTTP_200_OK,
+    tags=[Tags.users],
+    summary='Get user',
+)
+def get_user(user_id: int = Path(
+    default=...,
+    ge=1,
+)) -> User:
+    return User()
+
+@app.post(
+    path='/users',
+    status_code=status.HTTP_201_CREATED,
+    tags=[Tags.users],
+    summary='Create user',
+)
+def create_user(user_id: int = Path(
+    default=...,
+    ge=1,
+)) -> User:
+    return User()
+
+@app.put(
+    path='/users/{user_id}',
+    status_code=status.HTTP_200_OK,
+    tags=[Tags.users],
+    summary='Update user',
+)
+def update_user(user_id: int = Path(
+    default=...,
+    ge=1,
+)) -> User:
+    return User()
+
+@app.delete(
+    path='/users/{user_id}',
+    status_code=status.HTTP_200_OK,
+    tags=[Tags.users],
+    summary='Delete user',
+)
+def delete_user(user_id: int = Path(
+    default=...,
+    ge=1,
+)) -> User:
+    return User()
+
+''' Tweets '''
