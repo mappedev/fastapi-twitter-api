@@ -2,11 +2,11 @@ from datetime import date, datetime
 from enum import Enum
 import json
 from typing import List
-from uuid import UUID
+from uuid import uuid4, UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
-from fastapi import Body, FastAPI, Path, status
+from fastapi import Body, FastAPI, HTTPException, Path, status
 
 app = FastAPI()
 
@@ -18,7 +18,7 @@ class Tags(Enum):
 
 
 class UserBase(BaseModel):
-    id: UUID = Field(default=...)
+    id: UUID = Field(default_factory=uuid4) # añadimos default_factory
     email: EmailStr = Field(default=..., example='mappedev@gmail.com')
 
 
@@ -91,23 +91,28 @@ def signup(user: UserRegister = Body(default=...)) -> User:
     This path operation register an user in the app.
     
     Parameters:
-        - Request body parameter
-            - user: UserRegister
+    - Request body parameter
+        - user: UserRegister
     
     Returns a json with the user model
-        - id: UUID
-        - email: EmailStr
-        - first_name: str
-        - last_name: str
-        - birth_day: date
+    - id: UUID
+    - email: EmailStr
+    - first_name: str
+    - last_name: str
+    - birth_day: date
     '''
     with open('users.json', 'r+', encoding='utf-8') as f:
         # results = json.loads(f.read()) # loads load a string
         results = json.load(f)
 
-        user_dict = user.dict()
-        user_dict['id'] = str(user_dict['id'])
+        if any(userJson['email'] == user.email for userJson in results):
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already exist!",
+            )
 
+        user_dict = user.dict()
+        user_dict['id'] = str(uuid4())
         user_birth_date = user_dict.get('birth_date', None)
         if user_birth_date:
             user_dict['birth_date'] = str(user_birth_date)
@@ -135,7 +140,21 @@ def login() -> UserLogin:
     summary='Get all users',
 )
 def get_all_users() -> List[User]:
-    return [User()]
+    '''
+    Get users
+
+    This path operation get all users in the app.
+
+    Returns a list json with the user model
+    - id: UUID
+    - email: EmailStr
+    - first_name: str
+    - last_name: str
+    - birth_day: date
+    '''
+    with open('users.json', 'r', encoding='utf-8') as f:
+        results = json.load(f)
+        return results
 
 @app.get(
     path='/users/{user_id}',
@@ -147,15 +166,6 @@ def get_user(user_id: int = Path(
     default=...,
     ge=1,
 )) -> User:
-    return User()
-
-@app.post(
-    path='/users',
-    status_code=status.HTTP_201_CREATED,
-    tags=[Tags.users],
-    summary='Create user',
-)
-def create_user(user: User = Body(default=...)) -> User:
     return User()
 
 @app.put(
