@@ -1,5 +1,6 @@
 from datetime import date, datetime
 from enum import Enum
+import json
 from typing import List
 from uuid import UUID
 
@@ -83,8 +84,10 @@ def home() -> dict[str, str]:
     tags=[Tags.auth],
     summary='Register a user',
 )
-def signup() -> User:
+def signup(user: UserRegister = Body(default=...)) -> User:
     '''
+    Signup
+
     This path operation register an user in the app.
     
     Parameters:
@@ -96,9 +99,24 @@ def signup() -> User:
         - email: EmailStr
         - first_name: str
         - last_name: str
-        - birth_day: str
+        - birth_day: date
     '''
-    return User()
+    with open('users.json', 'r+', encoding='utf-8') as f:
+        # results = json.loads(f.read()) # loads load a string
+        results = json.load(f)
+
+        user_dict = user.dict()
+        user_dict['id'] = str(user_dict['id'])
+
+        user_birth_date = user_dict.get('birth_date', None)
+        if user_birth_date:
+            user_dict['birth_date'] = str(user_birth_date)
+            
+        results.append(user_dict)
+        f.seek(0)
+        json.dump(results, f)
+
+        return user
 
 @app.post(
     path='/auth/login',
