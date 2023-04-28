@@ -5,7 +5,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
-from fastapi import FastAPI, Path, status
+from fastapi import Body, FastAPI, Path, status
 
 app = FastAPI()
 
@@ -119,10 +119,7 @@ def get_user(user_id: int = Path(
     tags=[Tags.users],
     summary='Create user',
 )
-def create_user(user_id: int = Path(
-    default=...,
-    ge=1,
-)) -> User:
+def create_user(user: User = Body(default=...)) -> User:
     return User()
 
 @app.put(
@@ -150,3 +147,56 @@ def delete_user(user_id: int = Path(
     return User()
 
 ''' Tweets '''
+@app.get(
+    path='/tweets',
+    status_code=status.HTTP_200_OK,
+    tags=[Tags.tweets],
+    summary='Get all tweets',
+)
+def get_all_tweets() -> List[Tweet]:
+    return [Tweet()]
+
+@app.get(
+    path='/tweets/{tweet_id}',
+    status_code=status.HTTP_200_OK,
+    tags=[Tags.tweets],
+    summary='Get tweet',
+)
+def get_tweet(tweet_id: int = Path(
+    default=...,
+    ge=1,
+)) -> Tweet:
+    return Tweet()
+
+@app.post(
+    path='/tweets',
+    status_code=status.HTTP_201_CREATED,
+    tags=[Tags.tweets],
+    summary='Create tweet',
+)
+def create_tweet(tweet: Tweet = Body(default=...)) -> Tweet:
+    return Tweet()
+
+@app.put(
+    path='/tweets/{tweet_id}',
+    status_code=status.HTTP_200_OK,
+    tags=[Tags.tweets],
+    summary='Update tweet',
+)
+def update_tweet(tweet_id: int = Path(
+    default=...,
+    ge=1,
+)) -> Tweet:
+    return Tweet()
+
+@app.delete(
+    path='/tweets/{tweet_id}',
+    status_code=status.HTTP_200_OK,
+    tags=[Tags.tweets],
+    summary='Delete tweet',
+)
+def delete_tweet(tweet_id: int = Path(
+    default=...,
+    ge=1,
+)) -> Tweet:
+    return Tweet()
