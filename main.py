@@ -55,7 +55,7 @@ class UserRegister(User, UserLogin):
 
 
 class Tweet(BaseModel):
-    id: UUID = Field(default=...)
+    id: UUID = Field(default_factory=uuid4)
     content: str = Field(
         default=...,
         min_length=1,
@@ -150,7 +150,7 @@ def get_all_users() -> List[User]:
     - email: EmailStr
     - first_name: str
     - last_name: str
-    - birth_day: date
+    - birth_day: datetime | None
     '''
     with open('users.json', 'r', encoding='utf-8') as f:
         results = json.load(f)
@@ -221,7 +221,45 @@ def get_tweet(tweet_id: int = Path(
     summary='Create tweet',
 )
 def create_tweet(tweet: Tweet = Body(default=...)) -> Tweet:
-    return Tweet()
+    '''
+    Post tweet
+
+    This path operation post a tweet in the app.
+
+    Parameters:
+    - Request body parameter
+        - tweet: Tweet
+    
+    Returns a model tweet
+    - id: UUID
+    - content: str
+    - created_at: datetime
+    - updated_at: datetime | None
+    - by: User
+    '''
+    with open('tweets.json', 'r+', encoding='utf-8') as f:
+        results = json.load(f)
+
+        tweet_dict = tweet.dict()
+        tweet_dict['id'] = str(uuid4())
+
+        tweet_created_at = tweet_dict.get('created_at', None) 
+        if tweet_created_at:
+            tweet_dict['created_at'] = str(tweet_created_at)
+
+        tweet_updated_at = tweet_dict.get('updated_at', None) 
+        if tweet_updated_at:
+            tweet_dict['updated_at'] = str(tweet_updated_at)
+        
+        tweet_dict['by']['id'] = str(tweet_dict['by']['id'])
+        tweet_dict['by']['birth_date'] = str(tweet_dict['by']['birth_date'])
+
+        results.append(tweet_dict)
+        f.seek(0)
+        json.dump(results, f)
+
+        return tweet
+
 
 @app.put(
     path='/tweets/{tweet_id}',
