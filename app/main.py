@@ -12,7 +12,7 @@ from fastapi import FastAPI
 
 app = FastAPI(title="Twitter API", version="0.0.1")
 
-app.get('/')
+@app.get('/')
 def home():
     return {'message': 'Hello World'}
 
