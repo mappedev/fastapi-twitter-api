@@ -12,10 +12,6 @@ from config.settings import settings
 
 app = FastAPI(title="Twitter API", version="0.0.1")
 
-@app.get('/')
-def home():
-    return {'message': 'Hello World'}
-
 # include_middlewares(app=app)
 include_router(app=app)
 
