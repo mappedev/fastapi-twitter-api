@@ -8,6 +8,7 @@ load_dotenv()
 
 class Settings(BaseSettings):
     databases = {"url": os.getenv("DB_URL")}
+    environment = os.getenv("ENVIRONMENT", "local")
     tokens = {
         "access_token": {
             "secret_key": os.getenv("ACCESS_SECRET_KEY"),
